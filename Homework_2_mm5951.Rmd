@@ -5,26 +5,84 @@ date: "`r Sys.Date()`"
 output: github_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include=FALSE}
+library(tidyverse)
+library(readxl)
 ```
 
-## R Markdown
+## Problem 1
+We use the `readr` package to import the dataset, the `janitor::clean_name`function to clean it.
+Next, create a separate dataset for the requested variables. Note some include quotation marks (if non-logical or numerical DOUBLE CHECK ARGUMENT).
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+I'M STUCK ON RECODING
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+subway_df = read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
+  janitor::clean_names() %>% 
 
-```{r cars}
-summary(cars)
+subway2_df = select(subway_df, Line:"Entry", "Vending", ADA) 
+
+subway3_df = subway2_df %>% pull("Entry") %>% recode("YES" = TRUE, "NO" = FALSE)
+
+subway3_df = mutate(subway2_df,"Entry", "YES" = TRUE, "NO" = FALSE)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+## Problem 2
+First, I import the Mr. Trash Wheel dataset using `read_excel` function (note the library `readxl` has been previously installed, not shown).
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+Piped into the same code chunk, next, I proceed to read and clean the Mr. Trash Wheel sheet:
+
+* specify the "Mr. Trash Wheel" sheet
+* **PENDING** : omit non-data entries (rows with notes / figures; columns containing notes)
+* omit rows that do not include dumpster-specific data
+* round the number of sports balls to the nearest integer using `mutate`
+* **PENDING** convert the result to an integer variable (using as.integer)
+
+```{r}
+Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+    sheet = "Mr. Trash Wheel",
+    range = "A2:N534",) %>% 
+  janitor::clean_names() %>% 
+  drop_na("dumpster") %>% 
+  mutate(sports_balls = round(sports_balls, 0))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps **pending - also review NXX number**).
+
+```{r}
+Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+    sheet = "Professor Trash Wheel",
+    range = "A2:N123",) %>% 
+  janitor::clean_names() %>% 
+  drop_na("dumpster") %>% 
+  mutate(sports_balls = round(sports_balls, 0))
+```
+
+Next, I and stack the two datasets (that is, combine one on top of the other) using the `bind_rows` function. To do so, first I generate an "Id" column, containing the prefix "M" for Mr Trash and "P" for the Professor dataframes. In doing so, I use the function `mutate` to generate a "M" or "P" containing columns, and then merge it using `unite` with the corresponding "dumpster" number.
+
+```{r}
+Mr_trash2_df = Mr_trash_df %>% 
+  mutate(Mr = "M", .before = "dumpster")  %>% 
+  unite('Id', Mr:dumpster, sep = "", remove = FALSE)
+
+Prof_trash2_df = Prof_trash_df %>% 
+  mutate(Prof = "P", .before = "dumpster")  %>% 
+  unite('Id', Prof:dumpster, sep = "", remove = FALSE)
+
+stacked_trash_df = bind_rows(Mr_trash2_df, Prof_trash2_df) %>% 
+  janitor::clean_names()
+```
+
+The resulting merged dataset contains XX observations, n=453 from Mr Trash and n=71 from Professor trash.
+
+**pending** Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
+
+```{r}
+trash_2020_df = trash_df %>% 
+  filter(year == "2020")
+```
+
+
+## Problem 2
+
