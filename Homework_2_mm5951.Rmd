@@ -10,34 +10,16 @@ library(tidyverse)
 library(readxl)
 ```
 
-## Problem 1
-We use the `readr` package to import the dataset, the `janitor::clean_name`function to clean it.
-Next, create a separate dataset for the requested variables. Note some include quotation marks (if non-logical or numerical DOUBLE CHECK ARGUMENT).
-
-I'M STUCK ON RECODING
-
-```{r}
-subway_df = read_csv("./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
-  janitor::clean_names() %>% 
-
-subway2_df = select(subway_df, Line:"Entry", "Vending", ADA) 
-
-subway3_df = subway2_df %>% pull("Entry") %>% recode("YES" = TRUE, "NO" = FALSE)
-
-subway3_df = mutate(subway2_df,"Entry", "YES" = TRUE, "NO" = FALSE)
-```
-
-
 ## Problem 2
 First, I import the Mr. Trash Wheel dataset using `read_excel` function (note the library `readxl` has been previously installed, not shown).
 
 Piped into the same code chunk, next, I proceed to read and clean the Mr. Trash Wheel sheet:
 
 * specify the "Mr. Trash Wheel" sheet
-* **PENDING** : omit non-data entries (rows with notes / figures; columns containing notes)
+* omit non-data entries (by selecting range "A2:N534")
 * omit rows that do not include dumpster-specific data
 * round the number of sports balls to the nearest integer using `mutate`
-* **PENDING** convert the result to an integer variable (using as.integer)
+* **PENDING - IT DOESN'T WORK, REMAINS AS CHARACTER** convert the result to an integer variable (using as.integer)
 
 ```{r}
 Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
@@ -45,7 +27,10 @@ Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
     range = "A2:N534",) %>% 
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
-  mutate(sports_balls = round(sports_balls, 0))
+  mutate(sports_balls = round(sports_balls, 0)) %>% 
+  transform(sports_balls = as.integer(sports_balls))
+
+typeof("sports_balls")
 ```
 
 I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps **pending - also review NXX number**).
@@ -53,36 +38,37 @@ I use a similar process to import, clean, and organize the data for Professor Tr
 ```{r}
 Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
     sheet = "Professor Trash Wheel",
-    range = "A2:N123",) %>% 
+    range = "A2:N123",) %>%  
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
-  mutate(sports_balls = round(sports_balls, 0))
+  mutate(sports_balls = round(sports_balls, 0)) %>% 
+  transform(sports_balls = as.integer(sports_balls))
 ```
 
-Next, I and stack the two datasets (that is, combine one on top of the other) using the `bind_rows` function. To do so, first I generate an "Id" column, containing the prefix "M" for Mr Trash and "P" for the Professor dataframes. In doing so, I use the function `mutate` to generate a "M" or "P" containing columns, and then merge it using `unite` with the corresponding "dumpster" number.
+Next, I and stack the two datasets (that is, combine one on top of the other) using the `bind_rows` function. To do so, first I generate an "origin" column, containing the prefix "M" for Mr Trash and "P" for the Professor dataframes. In doing so, I use the function `mutate` to generate a "M" or "P" containing columns, and then merge it using `unite` with the corresponding "dumpster" number, creating an "Id" column.
 
 ```{r}
 Mr_trash2_df = Mr_trash_df %>% 
-  mutate(Mr = "M", .before = "dumpster")  %>% 
-  unite('Id', Mr:dumpster, sep = "", remove = FALSE)
+  mutate(origin = "M", .before = "dumpster")  %>% 
+  unite('Id', origin:dumpster, sep = "", remove = FALSE)
 
 Prof_trash2_df = Prof_trash_df %>% 
-  mutate(Prof = "P", .before = "dumpster")  %>% 
-  unite('Id', Prof:dumpster, sep = "", remove = FALSE)
+  mutate(origin = "P", .before = "dumpster")  %>% 
+  unite('Id', origin:dumpster, sep = "", remove = FALSE)
 
 stacked_trash_df = bind_rows(Mr_trash2_df, Prof_trash2_df) %>% 
   janitor::clean_names()
 ```
 
-The resulting merged dataset contains XX observations, n=453 from Mr Trash and n=71 from Professor trash.
+The resulting merged dataset contains `R col()`XX observations, n=453 from Mr Trash and n=71 from Professor trash.
 
-**pending** Write a paragraph about these data; you are encouraged to use inline R. Be sure to note the number of observations in the resulting dataset, and give examples of key variables. For available data, what was the total weight of trash collected by Professor Trash Wheel? What was the total number of sports balls collected by Mr. Trash Wheel in 2020?
+In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash_df)`. Mr. Trash Wheel data contains `r nrow(Mr_trash_df)` observations of dumpsters, and collects data about `r ncol(Mr_trash_df)` related variables. Notably, some key results:
 
-```{r}
-trash_2020_df = trash_df %>% 
-  filter(year == "2020")
-```
+* Mr. Trash collected a total of `r sum(Mr_trash_df$weight_tons)` tons of dumpster over the entire study period.
+* In 2020, he collected a total of `r sum(select(filter(Mr_trash_df$sports_balls, Mr_trash_df$year == 2020), total))`sports balls.
+
+** PENDING SOME FILTERING ERROR FOR THE RESULTS***
 
 
 ## Problem 2
-
+** PENDING**
