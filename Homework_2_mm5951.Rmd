@@ -13,13 +13,13 @@ library(readxl)
 ## Problem 2
 First, I import the Mr. Trash Wheel dataset using `read_excel` function (note the library `readxl` has been previously installed, not shown).
 
-Piped into the same code chunk, next, I proceed to read and clean the Mr. Trash Wheel sheet:
+Piped into the same code chunk, I proceed to read and clean the Mr. Trash Wheel sheet:
 
 * specify the "Mr. Trash Wheel" sheet
 * omit non-data entries (by selecting range "A2:N534")
 * omit rows that do not include dumpster-specific data
 * round the number of sports balls to the nearest integer using `mutate`
-* **PENDING - IT DOESN'T WORK, REMAINS AS CHARACTER** convert the result to an integer variable (using as.integer)
+* convert the result to an integer variable using the `as.integer`function
 
 ```{r}
 Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
@@ -28,17 +28,21 @@ Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
   mutate(sports_balls = round(sports_balls, 0)) %>% 
-  transform(sports_balls = as.integer(sports_balls))
-
-typeof("sports_balls")
+  transform(sports_balls = as.integer(sports_balls)) 
 ```
 
-I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps **pending - also review NXX number**).
+Finally, I use the `str()` function to compactly display the structure of the Mr_trash_df dataframe and check the integer nature of the "sports_balls" variable.
+
+```{r}
+  str(Mr_trash_df$"sports_balls")
+```
+
+I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps and functions as described above).
 
 ```{r}
 Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
     sheet = "Professor Trash Wheel",
-    range = "A2:N123",) %>%  
+    range = "A2:N115",) %>%  
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
   mutate(sports_balls = round(sports_balls, 0)) %>% 
@@ -60,14 +64,12 @@ stacked_trash_df = bind_rows(Mr_trash2_df, Prof_trash2_df) %>%
   janitor::clean_names()
 ```
 
-The resulting merged dataset contains `R col()`XX observations, n=453 from Mr Trash and n=71 from Professor trash.
+The resulting merged dataset contains `r nrow(stacked_trash_df)` observations, n=453 from Mr Trash and n=71 from Professor trash.
 
-In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash_df)`. Mr. Trash Wheel data contains `r nrow(Mr_trash_df)` observations of dumpsters, and collects data about `r ncol(Mr_trash_df)` related variables. Notably, some key results:
+In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash_df)`. Mr. Trash Wheel data contains `r nrow(Mr_trash_df)` observations of dumpsters, and collects data about `r ncol(Mr_trash_df)` related variables. Notably, some key results are:
 
-* Mr. Trash collected a total of `r sum(Mr_trash_df$weight_tons)` tons of dumpster over the entire study period.
-* In 2020, he collected a total of `r sum(select(filter(Mr_trash_df$sports_balls, Mr_trash_df$year == 2020), total))`sports balls.
-
-** PENDING SOME FILTERING ERROR FOR THE RESULTS***
+* Over the entire study period, Mr. Trash collected a total of `r sum(Mr_trash_df$weight_tons)` tons of dumpster.
+* In 2020 alone, he collected a total of `r sum(pull(filter(Mr_trash_df, year == 2020), sports_balls))` sports balls.
 
 
 ## Problem 2
