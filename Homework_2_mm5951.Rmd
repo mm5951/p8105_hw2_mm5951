@@ -10,6 +10,9 @@ library(tidyverse)
 library(readxl)
 ```
 
+## Problem 1
+Solutions provided in the p8105 course page.
+
 ## Problem 2
 First, I import the Mr. Trash Wheel dataset using `read_excel` function (note the library `readxl` has been previously installed, not shown).
 
