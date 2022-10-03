@@ -1,7 +1,7 @@
 Homework 2
 ================
 mm5951
-2022-10-01
+2022-10-02
 
 ## Problem 2
 
@@ -81,12 +81,106 @@ month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,
 polystyrene, cigarette_butts, glass_bottles, grocery_bags, chip_bags,
 sports_balls, homes_powered. Mr. Trash Wheel data contains 453
 observations of dumpsters, and collects data about 14 related variables.
-Notably, some key results:
+Notably, some key results are:
 
 -   Over the entire study period, Mr. Trash collected a total of 1449.7
     tons of dumpster.
 -   In 2020 alone, he collected a total of 856 sports balls.
 
-## Problem 2
+## Problem 3
 
-\*\* PENDING\*\*
+First, I import the **“pols-month.csv” dataset** (part of
+“FiveThirtyEight data”) using the `read_csv` function. More
+specifically, the following functions are used:
+
+-   To clean names, the `janitor::clean_names()` function;
+-   To break the date “mon” variable into individual year, month, and
+    day, the `separate()` function;
+-   To coerce into integer data types, the `as.integer()` function;
+-   To replace month number with month name, as well as create a
+    president variable taking values “gop” and “dem”, the `mutate()`
+    function;
+-   To remove the “prez_dem”, “prez_gop” and “day” variables, the
+    `select()`function.
+-   To arrange according to year and month, the `arrange()` function.
+
+``` r
+polsmonth_df = read_csv("./Data/pols-month.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(mon, into = c("year", "month", "day")) %>%
+  arrange(year, as.integer(month)) %>%
+  mutate(year = as.integer(year),
+         month = month.name[as.integer(month)],
+         president = if_else(prez_dem == 1, "dem", "gop")
+         ) %>%
+  select(-day, -prez_dem, -prez_gop)
+```
+
+Next, I proceed similarly as described above for the **“snp.csv”** and
+**“unemployment.csv” datasets**.
+
+``` r
+snp_df = read_csv("./Data/snp.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(date, into = c("month", "day", "year")) %>%
+  mutate(year = as.integer(year),
+         month = as.integer(month),
+         year = ifelse(year >= 23, year + 1900, year + 2000)
+         ) %>%
+  relocate(year) %>%
+  arrange(year, month) %>%
+  mutate(month = month.name[as.integer(month)]) %>%
+  select(-day)
+```
+
+For the “unemployment.csv” dataset, some additional steps are taken:
+
+-   Switch from “wide” to “long” format using `pivot_longer()`function;
+-   Renaming some of the key variables so they have the same name and
+    take the same values, using `mutate()` and `as.integer()`.
+
+``` r
+unemployment_df = read_csv("./Data/unemployment.csv", show_col_types = FALSE) %>%
+  pivot_longer("Jan":"Dec",
+        names_to = "month",
+        values_to = "unemployment"
+        ) %>%
+  janitor::clean_names() %>%
+  mutate( month = month.name[match(month, month.abb)],
+          year = as.integer(year)
+         )
+```
+
+Then I proceed to **join the datasets**, first by merging “snp_df” into
+“polsmonth_df”, and then merging “unemployment_df” into the result. To
+do so, I use the `full_join()` function.
+
+``` r
+joint_df = full_join(polsmonth_df, snp_df)
+joint2_df = full_join(joint_df, unemployment_df)
+```
+
+Finally, I describe the contents of the overall “joint2_df” dataset, as
+well as the dimension, range of years, and names of key variables of
+each separate original ones.
+
+-   The **“pols-month.csv” dataset** entails:
+    -   The dataset has 822 observations and 9 variables (columns).
+    -   The years range from 1947 to 2015.
+    -   The key variables are listed as: year, month, gov_gop, sen_gop,
+        rep_gop, gov_dem, sen_dem, rep_dem, president.
+-   The **“snp.csv”** dataset entails:
+    -   The dataset has 787 observations and 3 variables (columns).
+    -   The years range from 1950 to 2015.
+    -   The key variables are listed as: year, month, close.
+-   The **“unemployment.csv”** dataset entails:
+    -   The dataset has 816 observations and 3 variables (columns).
+    -   The years range from 1948 to 2015.
+    -   The key variables are listed as: year, month, unemployment.
+-   The final **“joint2_df”** dataset, which is the result of a merging
+    from the three described above, entails:
+    -   The dataset has 828 observations and 11 variables (columns).
+    -   The years range from 1947 to 2015
+    -   The key variables are listed as: year, month, gov_gop, sen_gop,
+        rep_gop, gov_dem, sen_dem, rep_dem, president, close,
+        unemployment.

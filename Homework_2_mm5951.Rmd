@@ -72,5 +72,88 @@ In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash
 * In 2020 alone, he collected a total of `r sum(pull(filter(Mr_trash_df, year == 2020), sports_balls))` sports balls.
 
 
-## Problem 2
-** PENDING**
+## Problem 3
+
+First, I import the **"pols-month.csv" dataset** (part of "FiveThirtyEight data") using the `read_csv` function. More specifically, the following functions are used:
+
+* To clean names, the `janitor::clean_names()` function;
+* To break the date "mon" variable into individual year, month, and day, the `separate()` function;
+* To coerce into integer data types, the `as.integer()` function;
+* To replace month number with month name, as well as create a president variable taking values "gop" and "dem", the `mutate()` function;
+* To remove the "prez_dem", "prez_gop" and "day" variables, the `select()`function.
+* To arrange according to year and month, the `arrange()` function.
+
+```{r}
+polsmonth_df = read_csv("./Data/pols-month.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(mon, into = c("year", "month", "day")) %>%
+  arrange(year, as.integer(month)) %>%
+  mutate(year = as.integer(year),
+         month = month.name[as.integer(month)],
+         president = if_else(prez_dem == 1, "dem", "gop")
+         ) %>%
+  select(-day, -prez_dem, -prez_gop)
+```
+
+Next, I proceed similarly as described above for the **"snp.csv"** and **"unemployment.csv" datasets**.
+
+```{r}
+snp_df = read_csv("./Data/snp.csv", show_col_types = FALSE) %>%
+  janitor::clean_names() %>%
+  separate(date, into = c("month", "day", "year")) %>%
+  mutate(year = as.integer(year),
+         month = as.integer(month),
+         year = ifelse(year >= 23, year + 1900, year + 2000)
+         ) %>%
+  relocate(year) %>%
+  arrange(year, month) %>%
+  mutate(month = month.name[as.integer(month)]) %>%
+  select(-day)
+```
+
+For the "unemployment.csv" dataset, some additional steps are taken:
+
+* Switch from “wide” to “long” format using `pivot_longer()`function; 
+* Renaming some of the key variables so they have the same name and take the same values, using `mutate()` and `as.integer()`.
+
+```{r}
+unemployment_df = read_csv("./Data/unemployment.csv", show_col_types = FALSE) %>%
+  pivot_longer("Jan":"Dec",
+        names_to = "month",
+        values_to = "unemployment"
+        ) %>%
+  janitor::clean_names() %>%
+  mutate( month = month.name[match(month, month.abb)],
+          year = as.integer(year)
+         )
+```
+
+Then I proceed to **join the datasets**, first by merging "snp_df" into "polsmonth_df", and then merging "unemployment_df" into the result. To do so, I use the `full_join()` function.
+
+```{r, message = FALSE}
+joint_df = full_join(polsmonth_df, snp_df)
+joint2_df = full_join(joint_df, unemployment_df)
+```
+
+Finally, I describe the contents of the overall "joint2_df" dataset, as well as the dimension, range of years, and names of key variables of each separate original ones.
+
+* The **"pols-month.csv" dataset** entails:
+    -   The dataset has `r nrow(polsmonth_df)` observations and `r ncol(polsmonth_df)` variables (columns).
+    -   The years range from `r min(polsmonth_df$year)` to `r max(polsmonth_df$year)`.
+    -   The key variables are listed as: `r names(polsmonth_df)`.
+
+* The **"snp.csv"** dataset entails:
+    -   The dataset has `r nrow(snp_df)` observations and `r ncol(snp_df)` variables (columns).
+    -   The years range from `r min(snp_df$year)` to `r max(snp_df$year)`.
+    -   The key variables are listed as:  `r names(snp_df)`.
+
+* The **"unemployment.csv"** dataset entails:
+    -   The dataset has `r nrow(unemployment_df)` observations and `r ncol(unemployment_df)` variables (columns).
+    -   The years range from `r min(unemployment_df$year)` to `r max(unemployment_df$year)`.
+    -   The key variables are listed as:  `r names(unemployment_df)`.
+
+* The final **"joint2_df"** dataset, which is the result of a merging from the three described above, entails:
+    -   The dataset has `r nrow(joint2_df)` observations and `r ncol(joint2_df)` variables (columns).
+    -   The years range from `r min(joint2_df$year)` to `r max(joint2_df$year)`
+    -   The key variables are listed as:  `r names(joint2_df)`.
+
