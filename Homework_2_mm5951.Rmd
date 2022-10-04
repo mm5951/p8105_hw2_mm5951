@@ -22,7 +22,7 @@ Piped into the same code chunk, I proceed to read and clean the Mr. Trash Wheel 
 * omit non-data entries (by selecting range "A2:N534")
 * omit rows that do not include dumpster-specific data
 * round the number of sports balls to the nearest integer using `mutate`
-* convert the result to an integer variable using the `as.integer`function
+* convert the result to an integer variable using the `transform` and `as.integer`function
 
 ```{r}
 Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
