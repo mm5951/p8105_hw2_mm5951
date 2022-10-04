@@ -1,7 +1,11 @@
 Homework 2
 ================
 mm5951
-2022-10-02
+2022-10-04
+
+## Problem 1
+
+Solutions provided in the p8105 course page.
 
 ## Problem 2
 
@@ -12,17 +16,17 @@ Piped into the same code chunk, I proceed to read and clean the
 Mr. Trash Wheel sheet:
 
 -   specify the “Mr. Trash Wheel” sheet
--   omit non-data entries (by selecting range “A2:N534”)
+-   omit non-data entries (by selecting range “A2:N549”)
 -   omit rows that do not include dumpster-specific data
 -   round the number of sports balls to the nearest integer using
     `mutate`
--   convert the result to an integer variable using the
+-   convert the result to an integer variable using the `transform` and
     `as.integer`function
 
 ``` r
-Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Data.xlsx",
     sheet = "Mr. Trash Wheel",
-    range = "A2:N534",) %>% 
+    range = "A2:N549",) %>% 
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
   mutate(sports_balls = round(sports_balls, 0)) %>% 
@@ -37,19 +41,23 @@ of the Mr_trash_df dataframe and check the integer nature of the
   str(Mr_trash_df$"sports_balls")
 ```
 
-    ##  int [1:453] 7 5 6 6 7 5 3 6 6 7 ...
+    ##  int [1:547] 7 5 6 6 7 5 3 6 6 7 ...
 
 I use a similar process to import, clean, and organize the data for
 Professor Trash Wheel (same steps and functions as described above).
+Note the variable “year” is converted into a character using
+`as.character` and “sports_balls” is newly created and transformed into
+a integer variable in order to allow for merging in a later step.
 
 ``` r
-Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Data.xlsx",
     sheet = "Professor Trash Wheel",
-    range = "A2:N115",) %>%  
+    range = "A2:M96",) %>%  
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
-  mutate(sports_balls = round(sports_balls, 0)) %>% 
-  transform(sports_balls = as.integer(sports_balls))
+  mutate(sports_balls = "NA", .after = "chip_bags") %>% 
+  transform(year = as.character(year)) %>% 
+  transform(sports_balls = as.integer(sports_balls)) 
 ```
 
 Next, I and stack the two datasets (that is, combine one on top of the
@@ -73,17 +81,17 @@ stacked_trash_df = bind_rows(Mr_trash2_df, Prof_trash2_df) %>%
   janitor::clean_names()
 ```
 
-The resulting merged dataset contains 524 observations, n=453 from Mr
-Trash and n=71 from Professor trash.
+The resulting merged dataset contains 641 observations, n=547 from Mr
+Trash and n=94 from Professor trash.
 
 In “Mr. Trash Wheel dataset”, the key variables are listed as: dumpster,
 month, year, date, weight_tons, volume_cubic_yards, plastic_bottles,
 polystyrene, cigarette_butts, glass_bottles, grocery_bags, chip_bags,
-sports_balls, homes_powered. Mr. Trash Wheel data contains 453
+sports_balls, homes_powered. Mr. Trash Wheel data contains 547
 observations of dumpsters, and collects data about 14 related variables.
 Notably, some key results are:
 
--   Over the entire study period, Mr. Trash collected a total of 1449.7
+-   Over the entire study period, Mr. Trash collected a total of 1748.36
     tons of dumpster.
 -   In 2020 alone, he collected a total of 856 sports balls.
 

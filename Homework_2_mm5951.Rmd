@@ -19,15 +19,15 @@ First, I import the Mr. Trash Wheel dataset using `read_excel` function (note th
 Piped into the same code chunk, I proceed to read and clean the Mr. Trash Wheel sheet:
 
 * specify the "Mr. Trash Wheel" sheet
-* omit non-data entries (by selecting range "A2:N534")
+* omit non-data entries (by selecting range "A2:N549")
 * omit rows that do not include dumpster-specific data
 * round the number of sports balls to the nearest integer using `mutate`
 * convert the result to an integer variable using the `transform` and `as.integer`function
 
 ```{r}
-Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+Mr_trash_df = read_excel("./data/Trash-Wheel-Collection-Data.xlsx",
     sheet = "Mr. Trash Wheel",
-    range = "A2:N534",) %>% 
+    range = "A2:N549",) %>% 
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
   mutate(sports_balls = round(sports_balls, 0)) %>% 
@@ -40,16 +40,17 @@ Finally, I use the `str()` function to compactly display the structure of the Mr
   str(Mr_trash_df$"sports_balls")
 ```
 
-I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps and functions as described above).
+I use a similar process to import, clean, and organize the data for Professor Trash Wheel (same steps and functions as described above). Note the variable "year" is converted into a character using `as.character` and "sports_balls" is newly created and transformed into a integer variable in order to allow for merging in a later step.
 
-```{r}
-Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
+```{r, warning = FALSE}
+Prof_trash_df = read_excel("./data/Trash-Wheel-Collection-Data.xlsx",
     sheet = "Professor Trash Wheel",
-    range = "A2:N115",) %>%  
+    range = "A2:M96",) %>%  
   janitor::clean_names() %>% 
   drop_na("dumpster") %>% 
-  mutate(sports_balls = round(sports_balls, 0)) %>% 
-  transform(sports_balls = as.integer(sports_balls))
+  mutate(sports_balls = "NA", .after = "chip_bags") %>% 
+  transform(year = as.character(year)) %>% 
+  transform(sports_balls = as.integer(sports_balls)) 
 ```
 
 Next, I and stack the two datasets (that is, combine one on top of the other) using the `bind_rows` function. To do so, first I generate an "origin" column, containing the prefix "M" for Mr Trash and "P" for the Professor dataframes. In doing so, I use the function `mutate` to generate a "M" or "P" containing columns, and then merge it using `unite` with the corresponding "dumpster" number, creating an "Id" column.
@@ -67,7 +68,7 @@ stacked_trash_df = bind_rows(Mr_trash2_df, Prof_trash2_df) %>%
   janitor::clean_names()
 ```
 
-The resulting merged dataset contains `r nrow(stacked_trash_df)` observations, n=453 from Mr Trash and n=71 from Professor trash.
+The resulting merged dataset contains `r nrow(stacked_trash_df)` observations, n=547 from Mr Trash and n=94 from Professor trash.
 
 In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash_df)`. Mr. Trash Wheel data contains `r nrow(Mr_trash_df)` observations of dumpsters, and collects data about `r ncol(Mr_trash_df)` related variables. Notably, some key results are:
 
