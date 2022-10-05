@@ -73,7 +73,7 @@ The resulting merged dataset contains `r nrow(stacked_trash_df)` observations, n
 In "Mr. Trash Wheel dataset", the key variables are listed as: `r names(Mr_trash_df)`. Mr. Trash Wheel data contains `r nrow(Mr_trash_df)` observations of dumpsters, and collects data about `r ncol(Mr_trash_df)` related variables. Notably, some key results are:
 
 * Over the entire study period, Prof. Trash collected a total of `r sum(Prof_trash_df$weight_tons)` tons of dumpster.
-* In 2020 alone, he collected a total of `r sum(pull(filter(Mr_trash_df, year == 2020), sports_balls))` sports balls.
+* In 2020 alone, Mr. Trash collected a total of `r sum(pull(filter(Mr_trash_df, year == 2020), sports_balls))` sports balls.
 
 
 ## Problem 3

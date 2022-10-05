@@ -93,7 +93,7 @@ Notably, some key results are:
 
 -   Over the entire study period, Prof. Trash collected a total of
     190.12 tons of dumpster.
--   In 2020 alone, he collected a total of 856 sports balls.
+-   In 2020 alone, Mr. Trash collected a total of 856 sports balls.
 
 ## Problem 3
 
