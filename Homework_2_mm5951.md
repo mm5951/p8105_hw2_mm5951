@@ -1,7 +1,7 @@
 Homework 2
 ================
 mm5951
-2022-10-04
+2022-10-05
 
 ## Problem 1
 
@@ -91,8 +91,8 @@ sports_balls, homes_powered. Mr. Trash Wheel data contains 547
 observations of dumpsters, and collects data about 14 related variables.
 Notably, some key results are:
 
--   Over the entire study period, Mr. Trash collected a total of 1748.36
-    tons of dumpster.
+-   Over the entire study period, Prof. Trash collected a total of
+    190.12 tons of dumpster.
 -   In 2020 alone, he collected a total of 856 sports balls.
 
 ## Problem 3
